@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collection OS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#d8d8e0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;padding:20px;}
+.outer{display:flex;justify-content:center;width:100%;}
+.ipad{background:#dcdce2;border-radius:22px;padding:10px;border:1.5px solid #c8c8d0;width:100%;max-width:960px;aspect-ratio:280/215;display:flex;flex-direction:column;}
+.screen{background:#f5f5f7;border-radius:14px;flex:1;padding:18px 22px;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0;}
+.logo{font-size:12px;font-weight:600;color:#1c1c1e;letter-spacing:.08em;text-transform:uppercase;}
+.logo span{color:#bbb;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.pill{font-size:10px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.04em;}
+.pill-ok{background:rgba(52,199,89,.12);color:#1a7a3a;border:0.5px solid rgba(52,199,89,.35);}
+.pill-warn{background:rgba(255,149,0,.12);color:#b85e00;border:0.5px solid rgba(255,149,0,.35);display:none;}
+.toptime{font-size:12px;color:#aaa;letter-spacing:.05em;}
+.home-view{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0;}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;flex:1;min-height:0;}
+.card{background:#fff;border:0.5px solid #e0e0e5;border-radius:14px;padding:16px;cursor:pointer;transition:border-color .18s,transform .15s;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;}
+.card:hover{border-color:#bbb;transform:translateY(-1px);}
+.card-accent{position:absolute;top:0;left:0;right:0;height:2px;}
+.ab{background:#378add;}.ap{background:#7f77dd;}.at{background:#1d9e75;}.ar{background:#e24b4a;}
+.icon-wrap{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.icon-wrap svg{width:17px;height:17px;}
+.ibl{background:rgba(55,138,221,.1);border:0.5px solid rgba(55,138,221,.2);}
+.ipu{background:rgba(127,119,221,.1);border:0.5px solid rgba(127,119,221,.2);}
+.itl{background:rgba(29,158,117,.1);border:0.5px solid rgba(29,158,117,.2);}
+.ird{background:rgba(226,75,74,.1);border:0.5px solid rgba(226,75,74,.2);}
+.clabel{font-size:9px;font-weight:500;color:#aaa;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px;}
+.ctitle{font-size:14px;font-weight:500;color:#1c1c1e;margin-bottom:8px;}
+.csub{font-size:11px;color:#aaa;margin-top:3px;}
+.cval{font-size:24px;font-weight:300;color:#1c1c1e;line-height:1;}
+.cunit{font-size:12px;color:#aaa;font-weight:400;}
+.sdot{width:5px;height:5px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle;}
+.dg{background:#34c759;}.do{background:#ff9500;}.dr{background:#ff3b30;}
+.footer-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;flex-shrink:0;}
+.fcard{background:#fff;border:0.5px solid #e0e0e5;border-radius:11px;padding:11px;text-align:center;}
+.fval{font-size:20px;font-weight:300;color:#1c1c1e;}
+.flabel{font-size:9px;color:#aaa;letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+.detail-view{display:none;flex:1;flex-direction:column;min-height:0;}
+.detail-view.show{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.dv-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-shrink:0;}
+.back-btn{display:flex;align-items:center;gap:4px;background:none;border:0.5px solid #ddd;border-radius:20px;padding:5px 12px;font-size:12px;color:#555;cursor:pointer;transition:background .15s;flex-shrink:0;}
+.back-btn:hover{background:#ebebf0;}
+.back-btn svg{width:12px;height:12px;}
+.dv-title{font-size:16px;font-weight:500;color:#1c1c1e;}
+.dv-sub{font-size:11px;color:#aaa;margin-top:1px;}
+.scroll-wrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;}
+.scroll-area{flex:1;overflow-y:auto;min-height:0;padding-right:6px;}
+.scroll-area::-webkit-scrollbar{width:2px;}
+.scroll-area::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px;}
+.scroll-hint{position:absolute;right:2px;bottom:6px;pointer-events:none;transition:opacity .3s;}
+.scroll-hint.hidden{opacity:0;}
+.scroll-arrow{width:22px;height:22px;border-radius:50%;background:#f0f0f5;border:0.5px solid #e0e0e5;display:flex;align-items:center;justify-content:center;animation:bounce .9s infinite;}
+.scroll-arrow svg{width:11px;height:11px;}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+.statusbar{background:#f0f0f5;border:0.5px solid #e0e0e5;border-radius:9px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#555;}
+.row-label{font-size:9px;color:#bbb;letter-spacing:.1em;text-transform:uppercase;margin:8px 0 5px;}
+.col-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin-bottom:3px;}
+.cslot{background:#f5f5f7;border:0.5px solid #e0e0e5;border-radius:9px;padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;}
+.cslot:hover{border-color:#378add;background:#eef4fc;}
+.cslot.sel{border-color:#378add;background:rgba(55,138,221,.1);}
+.cslot.mov{border-color:#ff9500;background:rgba(255,149,0,.08);animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.cslot .cn{font-size:12px;font-weight:500;color:#3a3a3c;}
+.cslot.sel .cn,.cslot.sel .cs{color:#185fa5;}
+.cslot.mov .cn,.cslot.mov .cs{color:#b85e00;}
+.cslot .cs{font-size:9px;color:#bbb;margin-top:1px;letter-spacing:.03em;}
+.actbar{display:flex;gap:8px;margin-top:12px;padding-bottom:4px;}
+.btn-p{background:#378add;color:#fff;border:none;border-radius:9px;padding:8px 18px;font-size:12px;font-weight:500;cursor:pointer;}
+.btn-s{background:transparent;color:#555;border:0.5px solid #ccc;border-radius:9px;padding:8px 18px;font-size:12px;cursor:pointer;}
+.zone-map{background:#fff;border-radius:11px;border:0.5px solid #e0e0e5;padding:12px;margin-bottom:12px;}
+.zone-row{display:flex;gap:7px;margin-bottom:5px;}
+.zslot{width:40px;height:28px;border-radius:6px;background:#f5f5f7;border:0.5px solid #e0e0e5;display:flex;align-items:center;justify-content:center;font-size:9px;color:#bbb;font-weight:500;position:relative;}
+.zslot.zi{background:#eef4fc;border-color:#85b7eb;color:#185fa5;}
+.zslot.zr{background:rgba(29,158,117,.08);border-color:#1d9e75;color:#0f6e56;}
+.rdot{width:5px;height:5px;border-radius:50%;background:#34c759;position:absolute;top:-2px;right:-2px;animation:blink 1.2s infinite;}
+.sbar{width:100%;padding:8px 12px;border-radius:8px;border:0.5px solid #e0e0e5;background:#f5f5f7;font-size:12px;color:#1c1c1e;margin-bottom:10px;outline:none;}
+.sbar::placeholder{color:#bbb;}
+.arow{display:flex;align-items:center;gap:10px;padding:9px 11px;background:#fff;border-radius:9px;border:0.5px solid #e0e0e5;margin-bottom:7px;}
+.athumb{width:32px;height:32px;border-radius:8px;background:rgba(127,119,221,.1);border:0.5px solid rgba(127,119,221,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.aname{font-size:12px;font-weight:500;color:#1c1c1e;}
+.aloc{font-size:10px;color:#aaa;margin-top:1px;}
+.atag{font-size:9px;font-weight:500;padding:2px 7px;border-radius:5px;background:rgba(55,138,221,.1);color:#185fa5;border:0.5px solid rgba(55,138,221,.2);flex-shrink:0;}
+.rtag{font-size:9px;font-weight:500;padding:2px 7px;border-radius:5px;background:rgba(29,158,117,.1);color:#0f6e56;border:0.5px solid rgba(29,158,117,.2);flex-shrink:0;}
+.sensor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.scard{background:#fff;border:0.5px solid #e0e0e5;border-radius:11px;padding:14px;}
+.scard.warn{border-color:rgba(255,149,0,.5);background:rgba(255,149,0,.04);}
+.sv{font-size:32px;font-weight:300;color:#1c1c1e;line-height:1;}
+.su{font-size:13px;color:#aaa;}
+.sr{font-size:10px;color:#bbb;margin-top:4px;}
+.swarn{font-size:10px;color:#b85e00;margin-top:4px;display:none;}
+.minibar{display:flex;gap:2px;align-items:flex-end;height:20px;margin-top:8px;}
+.minibar span{flex:1;border-radius:2px;background:#c0dd97;}
+.minibar span.hi{background:#ff9500;}
+.sim-box{background:#f5f5f7;border-radius:11px;border:0.5px solid #e0e0e5;padding:12px;}
+.sim-label{font-size:9px;color:#bbb;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+.sim-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.sim-key{font-size:11px;color:#888;width:48px;}
+.sim-val{font-size:11px;color:#3a3a3c;width:56px;text-align:right;}
+@media(max-width:640px){
+  body{padding:0;align-items:flex-start;}
+  .ipad{border-radius:0;border:none;aspect-ratio:unset;min-height:100vh;}
+  .screen{border-radius:0;padding:20px 16px;}
+  .cards{grid-template-columns:1fr;}
+  .footer-row{grid-template-columns:repeat(2,1fr);}
+  .col-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .sensor-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="outer">
+<div class="ipad">
+<div class="screen">
+
+<div class="topbar">
+  <div>
+    <div class="logo">Collection<span> OS</span></div>
+    <div style="font-size:10px;color:#bbb;margin-top:1px;letter-spacing:.05em;">VAULT B2 · LIVE MONITORING</div>
+  </div>
+  <div class="topbar-right">
+    <span class="pill pill-ok" id="pill-ok">● All systems nominal</span>
+    <span class="pill pill-warn" id="pill-warn">● Environment alert</span>
+    <span class="toptime" id="clk">--:--</span>
+  </div>
+</div>
+
+<div class="home-view" id="home">
+  <div class="cards">
+    <div class="card" onclick="showPanel('col')">
+      <div>
+        <div class="card-accent ab"></div>
+        <div class="icon-wrap ibl">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#378add" stroke-width="1.6">
+            <rect x="2" y="6" width="20" height="13" rx="2"/>
+            <line x1="7" y1="6" x2="7" y2="19"/><line x1="12" y1="6" x2="12" y2="19"/><line x1="17" y1="6" x2="17" y2="19"/>
+            <polyline points="9.5,11 12,8.5 14.5,11"/><line x1="12" y1="8.5" x2="12" y2="16"/>
+          </svg>
+        </div>
+        <div class="clabel">Mobile Storage</div>
+        <div class="ctitle">Collection Control</div>
+      </div>
+      <div>
+        <div><span class="sdot do"></span><span id="col-short" style="font-size:11px;color:#888;">A3 moving out</span></div>
+        <div class="csub">24 collection units total</div>
+      </div>
+    </div>
+    <div class="card" onclick="showPanel('rfid')">
+      <div>
+        <div class="card-accent ap"></div>
+        <div class="icon-wrap ipu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#7f77dd" stroke-width="1.6">
+            <circle cx="12" cy="12" r="2.5"/>
+            <path d="M6.5 6.5a7.7 7.7 0 0 0 0 11"/><path d="M17.5 6.5a7.7 7.7 0 0 1 0 11"/>
+            <path d="M3.5 3.5a16 16 0 0 0 0 17"/><path d="M20.5 3.5a16 16 0 0 1 0 17"/>
+          </svg>
+        </div>
+        <div class="clabel">Location Tracking</div>
+        <div class="ctitle">RFID Monitor</div>
+      </div>
+      <div>
+        <div><span class="sdot dg"></span><span style="font-size:11px;color:#888;">138 objects tracked</span></div>
+        <div class="csub">2 recently moved</div>
+      </div>
+    </div>
+    <div class="card" onclick="showPanel('env')">
+      <div>
+        <div class="card-accent at" id="env-accent"></div>
+        <div class="icon-wrap itl" id="env-iconwrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1d9e75" stroke-width="1.6" id="env-icon">
+            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+          </svg>
+        </div>
+        <div class="clabel">Environment</div>
+        <div class="ctitle">Temp &amp; Humidity</div>
+      </div>
+      <div>
+        <div style="display:flex;gap:14px;">
+          <div><span class="cval" id="temp-main">22.1</span><span class="cunit"> °C</span></div>
+          <div><span class="cval" id="hum-main">55</span><span class="cunit"> %RH</span></div>
+        </div>
+        <div class="csub" id="env-card-sub">Within safe parameters</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-row">
+    <div class="fcard"><div class="fval">138</div><div class="flabel">RFID tracked</div></div>
+    <div class="fcard"><div class="fval" id="f-out">1</div><div class="flabel">Collections out</div></div>
+    <div class="fcard"><div class="fval" id="f-env">Nominal</div><div class="flabel">Env. status</div></div>
+    <div class="fcard"><div class="fval">24</div><div class="flabel">Total units</div></div>
+  </div>
+</div>
+
+<div class="detail-view" id="dv-col">
+  <div class="dv-header">
+    <button class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Back
+    </button>
+    <div><div class="dv-title">Collection control</div><div class="dv-sub">Select a unit to move out · one active at a time</div></div>
+  </div>
+  <div class="scroll-wrap">
+    <div class="scroll-area" id="sa-col">
+      <div class="statusbar" id="col-sbar"><span class="sdot do"></span>Unit <strong>A3</strong> is moving out — positioning in progress</div>
+      <div id="col-rows"></div>
+      <div class="actbar">
+        <button class="btn-p" onclick="doMove()">Move out selected</button>
+        <button class="btn-s" onclick="doReturn()">Return all</button>
+      </div>
+    </div>
+    <div class="scroll-hint" id="sh-col"><div class="scroll-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg></div></div>
+  </div>
+</div>
+
+<div class="detail-view" id="dv-rfid">
+  <div class="dv-header">
+    <button class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Back
+    </button>
+    <div><div class="dv-title">RFID location tracking</div><div class="dv-sub">Vault B2 · real-time positions</div></div>
+  </div>
+  <div class="scroll-wrap">
+    <div class="scroll-area" id="sa-rfid">
+      <div class="zone-map">
+        <div style="font-size:9px;color:#bbb;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Vault floor plan</div>
+        <div id="zrow1" class="zone-row"></div>
+        <div id="zrow2" class="zone-row"></div>
+        <div id="zrow3" class="zone-row"></div>
+        <div style="margin-top:8px;display:flex;gap:14px;">
+          <span style="font-size:9px;color:#bbb;display:flex;align-items:center;gap:4px;"><span style="width:9px;height:9px;border-radius:2px;background:rgba(29,158,117,.1);border:0.5px solid #1d9e75;display:inline-block;"></span>RFID active</span>
+          <span style="font-size:9px;color:#bbb;display:flex;align-items:center;gap:4px;"><span style="width:9px;height:9px;border-radius:2px;background:#eef4fc;border:0.5px solid #85b7eb;display:inline-block;"></span>Occupied</span>
+        </div>
+      </div>
+      <input class="sbar" type="text" placeholder="Search by title, accession number, location…" oninput="filterArt(this.value)">
+      <div id="artlist"></div>
+    </div>
+    <div class="scroll-hint" id="sh-rfid"><div class="scroll-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg></div></div>
+  </div>
+</div>
+
+<div class="detail-view" id="dv-env">
+  <div class="dv-header">
+    <button class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Back
+    </button>
+    <div><div class="dv-title">Environment monitoring</div><div class="dv-sub">Safe range: 18–24 °C · 45–60 %RH</div></div>
+  </div>
+  <div class="scroll-wrap">
+    <div class="scroll-area" id="sa-env">
+      <div class="sensor-grid">
+        <div class="scard" id="tc">
+          <div style="font-size:9px;color:#aaa;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">Temperature</div>
+          <div><span class="sv" id="tv">22.1</span><span class="su"> °C</span></div>
+          <div class="sr">Safe range: 18 – 24 °C</div>
+          <div class="minibar" id="tbar"></div>
+          <div class="swarn" id="tw">Outside safe range</div>
+        </div>
+        <div class="scard" id="hc">
+          <div style="font-size:9px;color:#aaa;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">Humidity</div>
+          <div><span class="sv" id="hv">55</span><span class="su"> %RH</span></div>
+          <div class="sr">Safe range: 45 – 60 %RH</div>
+          <div class="minibar" id="hbar"></div>
+          <div class="swarn" id="hw">Outside safe range</div>
+        </div>
+      </div>
+      <div class="sim-box">
+        <div class="sim-label">Sensor simulation</div>
+        <div class="sim-row">
+          <span class="sim-key">Temp</span>
+          <input type="range" min="14" max="30" step="0.1" value="22.1" id="ts" style="flex:1;" oninput="upSensor()">
+          <span class="sim-val" id="tsv">22.1 °C</span>
+        </div>
+        <div class="sim-row">
+          <span class="sim-key">Humidity</span>
+          <input type="range" min="30" max="80" step="1" value="55" id="hs" style="flex:1;" oninput="upSensor()">
+          <span class="sim-val" id="hsv">55 %RH</span>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-hint" id="sh-env"><div class="scroll-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg></div></div>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+var selCol='A3',movCol='A3';
+var tHist=[21.5,21.8,22.0,21.9,22.1,22.3,22.1];
+var hHist=[52,53,54,55,54,55,55];
+
+function clk(){var d=new Date(),h=String(d.getHours()).padStart(2,'0'),m=String(d.getMinutes()).padStart(2,'0');document.getElementById('clk').textContent=h+':'+m;}
+clk();setInterval(clk,30000);
+
+function showPanel(id){
+  document.getElementById('home').style.display='none';
+  ['col','rfid','env'].forEach(function(p){document.getElementById('dv-'+p).classList.toggle('show',p===id);});
+  setTimeout(function(){checkScroll(id);},60);
+}
+function goHome(){
+  document.getElementById('home').style.display='';
+  ['col','rfid','env'].forEach(function(p){document.getElementById('dv-'+p).classList.remove('show');});
+}
+function checkScroll(id){
+  var sa=document.getElementById('sa-'+id);
+  var sh=document.getElementById('sh-'+id);
+  if(!sa||!sh)return;
+  function update(){sh.classList.toggle('hidden',sa.scrollTop+sa.clientHeight>=sa.scrollHeight-10);}
+  update();
+  sa.removeEventListener('scroll',sa._sh||null);
+  sa._sh=update;
+  sa.addEventListener('scroll',sa._sh);
+}
+
+function buildCols(){
+  var rows=['A','B','C','D'];
+  var cont=document.getElementById('col-rows');cont.innerHTML='';
+  rows.forEach(function(r){
+    var rl=document.createElement('div');rl.className='row-label';rl.textContent='Row '+r;cont.appendChild(rl);
+    var g=document.createElement('div');g.className='col-grid';
+    for(var i=1;i<=6;i++){
+      var id=r+i,d=document.createElement('div');
+      d.className='cslot'+(id===movCol?' mov':id===selCol?' sel':'');
+      d.innerHTML='<div class="cn">'+id+'</div><div class="cs">'+(id===movCol?'moving':'ready')+'</div>';
+      d.onclick=(function(did){return function(){selCol=did;if(selCol!==movCol)buildCols();};})(id);
+      g.appendChild(d);
+    }
+    cont.appendChild(g);
+  });
+}
+buildCols();
+
+function doMove(){
+  if(!selCol)return;
+  movCol=selCol;
+  document.getElementById('col-sbar').innerHTML='<span class="sdot do"></span>Unit <strong>'+movCol+'</strong> is moving out — positioning in progress';
+  document.getElementById('col-short').textContent=movCol+' moving out';
+  document.getElementById('f-out').textContent='1';
+  buildCols();
+}
+function doReturn(){
+  movCol=null;selCol=null;
+  document.getElementById('col-sbar').innerHTML='<span class="sdot dg"></span>All units returned to home position';
+  document.getElementById('col-short').textContent='All units home';
+  document.getElementById('f-out').textContent='0';
+  buildCols();
+}
+
+var arts=[
+  {n:'Bamboo and Rock',acc:'1998.045',loc:'A3 · Shelf 2',tag:'Painting',rfid:true},
+  {n:'Blue-and-white Prunus Vase',acc:'2001.112',loc:'B1 · Shelf 1',tag:'Ceramics',rfid:true},
+  {n:'Album of Ladies',acc:'1995.033',loc:'A5 · Shelf 3',tag:'Painting',rfid:false},
+  {n:'Gilt Bronze Buddha',acc:'2010.007',loc:'C2 · Shelf 2',tag:'Sculpture',rfid:true},
+  {n:'Landscape Handscroll',acc:'1987.021',loc:'B3 · Shelf 1',tag:'Painting',rfid:true},
+  {n:'Famille Rose Bowl',acc:'2005.088',loc:'D1 · Shelf 2',tag:'Ceramics',rfid:true},
+];
+function buildArts(f){
+  var c=document.getElementById('artlist');c.innerHTML='';
+  arts.filter(function(a){
+    if(!f)return true;
+    return a.n.toLowerCase().includes(f.toLowerCase())||a.acc.includes(f)||a.loc.toLowerCase().includes(f.toLowerCase());
+  }).forEach(function(a){
+    var d=document.createElement('div');d.className='arow';
+    d.innerHTML='<div class="athumb"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7f77dd" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div>'
+      +'<div style="flex:1"><div class="aname">'+a.n+'</div><div class="aloc">'+a.acc+' · '+a.loc+'</div></div>'
+      +'<span class="atag">'+a.tag+'</span>'
+      +(a.rfid?'<span class="rtag">RFID</span>':'');
+    c.appendChild(d);
+  });
+}
+function filterArt(v){buildArts(v);}
+buildArts();
+
+var rfidSlots=['A3','B1','A5','C2','B3','D1'];
+var hasSlots=['A1','A2','A3','A4','A5','B1','B2','B3','C2','D1'];
+[['A1','A2','A3','A4','A5','A6'],['B1','B2','B3','B4','B5','B6'],['C1','C2','C3','D1','D2','D3']].forEach(function(row,ri){
+  var el=document.getElementById('zrow'+(ri+1));
+  row.forEach(function(id){
+    var s=document.createElement('div');
+    s.className='zslot'+(rfidSlots.includes(id)?' zr':hasSlots.includes(id)?' zi':'');
+    s.textContent=id;
+    if(rfidSlots.includes(id)){var dot=document.createElement('span');dot.className='rdot';s.appendChild(dot);}
+    el.appendChild(s);
+  });
+});
+
+function buildBar(id,vals){
+  var b=document.getElementById(id);if(!b)return;b.innerHTML='';
+  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+  vals.forEach(function(v){
+    var s=document.createElement('span');
+    s.style.height=Math.max(3,Math.round(((v-mn)/(mx-mn||1))*20))+'px';
+    b.appendChild(s);
+  });
+}
+buildBar('tbar',tHist);buildBar('hbar',hHist);
+
+function upSensor(){
+  var t=parseFloat(document.getElementById('ts').value);
+  var h=parseInt(document.getElementById('hs').value);
+  document.getElementById('tsv').textContent=t.toFixed(1)+' °C';
+  document.getElementById('hsv').textContent=h+' %RH';
+  document.getElementById('tv').textContent=t.toFixed(1);
+  document.getElementById('hv').textContent=h;
+  document.getElementById('temp-main').textContent=t.toFixed(1);
+  document.getElementById('hum-main').textContent=h;
+  var tw=t<18||t>24,hw=h<45||h>60,warn=tw||hw;
+  document.getElementById('tc').className='scard'+(tw?' warn':'');
+  document.getElementById('hc').className='scard'+(hw?' warn':'');
+  document.getElementById('tw').style.display=tw?'block':'none';
+  document.getElementById('hw').style.display=hw?'block':'none';
+  document.getElementById('pill-warn').style.display=warn?'inline-block':'none';
+  document.getElementById('f-env').textContent=warn?'Alert':'Nominal';
+  document.getElementById('env-card-sub').textContent=warn?'Check conditions':'Within safe parameters';
+  var ea=document.getElementById('env-accent');
+  var eiw=document.getElementById('env-iconwrap');
+  var ei=document.getElementById('env-icon');
+  if(warn){ea.className='card-accent ar';eiw.className='icon-wrap ird';ei.setAttribute('stroke','#e24b4a');}
+  else{ea.className='card-accent at';eiw.className='icon-wrap itl';ei.setAttribute('stroke','#1d9e75');}
+  tHist.push(t);tHist.shift();hHist.push(h);hHist.shift();
+  buildBar('tbar',tHist);buildBar('hbar',hHist);
+}
+</script>
+</body>
+</html>
